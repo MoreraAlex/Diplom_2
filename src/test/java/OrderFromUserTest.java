@@ -1,3 +1,4 @@
+import Constructor.User;
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
@@ -11,7 +12,6 @@ import java.util.Random;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.CoreMatchers.equalTo;
 
 public class OrderFromUserTest {
     Random random = new Random();
@@ -35,8 +35,7 @@ public class OrderFromUserTest {
 
 
     @Before
-    public void setUp()
-    {
+    public void setUp() {
         RestAssured.baseURI = "https://stellarburgers.nomoreparties.site";
     }
 
@@ -50,13 +49,15 @@ public class OrderFromUserTest {
     @Test
     public void getAuthorizedUsersOrderTest() {
         String email = java.util.UUID.randomUUID() + "@gmail.com";
+        String password = java.util.UUID.randomUUID().toString();
         String name = java.util.UUID.randomUUID().toString();
+
+        User user = new User(email, password, name);
+        User userEmailAndPass = new User(email, password);
 
         String accessToken = given()
                 .contentType(ContentType.JSON)
-                .body("{\"email\":\"" + email + "\"," +
-                        "\"password\":\"1234\"," +
-                        "\"name\":\"" + name + "\"}")
+                .body(user)
                 .when()
                 .post("/api/auth/register")
                 .then()
@@ -71,7 +72,7 @@ public class OrderFromUserTest {
 
         accessToken = given()
                 .contentType(ContentType.JSON)
-                .body("{\"email\":\"" + email + "\"," + "\"password\":\"1234\"}")
+                .body(userEmailAndPass)
                 .when()
                 .post("/api/auth/login")
                 .then()
@@ -87,7 +88,7 @@ public class OrderFromUserTest {
         given()
                 .contentType(ContentType.JSON)
                 .header("Authorization", accessToken)
-                .body("{\"ingredients\":[\"" + randomIngredient +  "\",\"" + ingredients.get(random.nextInt(ingredients.size())) +"\" ]}")
+                .body("{\"ingredients\":[\"" + randomIngredient + "\",\"" + ingredients.get(random.nextInt(ingredients.size())) + "\" ]}")
                 .when()
                 .post("/api/orders")
                 .then()
@@ -123,13 +124,15 @@ public class OrderFromUserTest {
     @Test
     public void getUnauthorizedUsersOrderTest() {
         String email = java.util.UUID.randomUUID() + "@gmail.com";
+        String password = java.util.UUID.randomUUID().toString();
         String name = java.util.UUID.randomUUID().toString();
+
+        User user = new User(email, password, name);
+        User userEmailAndPass = new User(email, password);
 
         String accessToken = given()
                 .contentType(ContentType.JSON)
-                .body("{\"email\":\"" + email + "\"," +
-                        "\"password\":\"1234\"," +
-                        "\"name\":\"" + name + "\"}")
+                .body(user)
                 .when()
                 .post("/api/auth/register")
                 .then()
@@ -144,7 +147,7 @@ public class OrderFromUserTest {
 
         accessToken = given()
                 .contentType(ContentType.JSON)
-                .body("{\"email\":\"" + email + "\"," + "\"password\":\"1234\"}")
+                .body(userEmailAndPass)
                 .when()
                 .post("/api/auth/login")
                 .then()
@@ -160,7 +163,7 @@ public class OrderFromUserTest {
         given()
                 .contentType(ContentType.JSON)
                 .header("Authorization", accessToken)
-                .body("{\"ingredients\":[\"" + randomIngredient +  "\",\"" + ingredients.get(random.nextInt(ingredients.size())) +"\" ]}")
+                .body("{\"ingredients\":[\"" + randomIngredient + "\",\"" + ingredients.get(random.nextInt(ingredients.size())) + "\" ]}")
                 .when()
                 .post("/api/orders")
                 .then()

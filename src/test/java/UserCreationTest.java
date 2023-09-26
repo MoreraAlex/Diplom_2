@@ -1,3 +1,4 @@
+import Constructor.User;
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
@@ -5,20 +6,15 @@ import io.restassured.http.ContentType;
 import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
-//import org.junit.jupiter.params.provider.Arguments;
-//import org.junit.jupiter.params.provider.MethodSource;
-//import org.junit.jupiter.params.ParameterizedTest;
-//import java.util.stream.Stream;
+
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
 
-//Создание пользователя + удаление пользователя. Импортировал junit.jupiter чтобы сделать отдельный параметризованный тест в рамках одного тестового класса, а не создавать отдельный класс для параметризованных тестов
 
 public class UserCreationTest {
 
     @Before
-    public void setUp()
-    {
+    public void setUp() {
         RestAssured.baseURI = "https://stellarburgers.nomoreparties.site";
     }
 
@@ -26,16 +22,16 @@ public class UserCreationTest {
     @Description("1. Создаем юзера \n" +
             "2. Удаляем юзера")
     @Test
-    public void createUserTest()
-    {
+    public void createUserTest() {
         String email = java.util.UUID.randomUUID() + "@gmail.com";
+        String password = java.util.UUID.randomUUID().toString();
         String name = java.util.UUID.randomUUID().toString();
+
+        User user = new User(email, password, name);
 
         String accessToken = given()
                 .contentType(ContentType.JSON)
-                .body("{\"email\":\"" + email + "\"," +
-                        "\"password\":\"1234\"," +
-                        "\"name\":\"" + name + "\"}")
+                .body(user)
                 .when()
                 .post("/api/auth/register")
                 .then()
@@ -46,7 +42,6 @@ public class UserCreationTest {
                 .body(CoreMatchers.containsString("refreshToken"))
                 .extract()
                 .path("accessToken");
-
 
 
         given()
@@ -64,16 +59,16 @@ public class UserCreationTest {
             "2. Попытка создать юзера_2 с данными уже созданного юзера_1\n" +
             "3.Удаляем юзера_1")
     @Test
-    public void createUserThatAlreadyExistsTest()
-    {
+    public void createUserThatAlreadyExistsTest() {
         String email = java.util.UUID.randomUUID() + "@gmail.com";
+        String password = java.util.UUID.randomUUID().toString();
         String name = java.util.UUID.randomUUID().toString();
+
+        User user = new User(email, password, name);
 
         String accessToken = given()
                 .contentType(ContentType.JSON)
-                .body("{\"email\":\"" + email + "\"," +
-                        "\"password\":\"1234\"," +
-                        "\"name\":\"" + name + "\"}")
+                .body(user)
                 .when()
                 .post("/api/auth/register")
                 .then()
@@ -88,9 +83,7 @@ public class UserCreationTest {
 
         given()
                 .contentType(ContentType.JSON)
-                .body("{\"email\":\"" + email + "\"," +
-                        "\"password\":\"1234\"," +
-                        "\"name\":\"" + name + "\"}")
+                .body(user)
                 .when()
                 .post("/api/auth/register")
                 .then()

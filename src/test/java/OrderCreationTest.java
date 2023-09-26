@@ -1,13 +1,14 @@
+import Constructor.User;
+import io.qameta.allure.Allure;
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
+import io.qameta.allure.model.Status;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import io.qameta.allure.Allure;
-import io.qameta.allure.model.Status;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -37,15 +38,13 @@ public class OrderCreationTest {
 
 
     @Before
-    public void setUp()
-    {
+    public void setUp() {
         RestAssured.baseURI = "https://stellarburgers.nomoreparties.site";
     }
 
     @After
     public void tearDown() {
         if (Status.FAILED.equals(Allure.getLifecycle().getCurrentTestCase())) {
-            // Добавьте скриншоты, логи или другие аттачи в случае ошибки
         }
     }
 
@@ -57,13 +56,15 @@ public class OrderCreationTest {
     @Test
     public void createOrderWithTokenTest() {
         String email = java.util.UUID.randomUUID() + "@gmail.com";
+        String password = java.util.UUID.randomUUID().toString();
         String name = java.util.UUID.randomUUID().toString();
+
+        User user = new User(email, password, name);
+        User userEmailAndPass = new User(email, password);
 
         String accessToken = given()
                 .contentType(ContentType.JSON)
-                .body("{\"email\":\"" + email + "\"," +
-                        "\"password\":\"1234\"," +
-                        "\"name\":\"" + name + "\"}")
+                .body(user)
                 .when()
                 .post("/api/auth/register")
                 .then()
@@ -78,7 +79,7 @@ public class OrderCreationTest {
 
         accessToken = given()
                 .contentType(ContentType.JSON)
-                .body("{\"email\":\"" + email + "\"," + "\"password\":\"1234\"}")
+                .body(userEmailAndPass)
                 .when()
                 .post("/api/auth/login")
                 .then()
@@ -94,14 +95,13 @@ public class OrderCreationTest {
         given()
                 .contentType(ContentType.JSON)
                 .header("Authorization", accessToken)
-                .body("{\"ingredients\":[\"" + randomIngredient +  "\",\"" + ingredients.get(random.nextInt(ingredients.size())) +"\" ]}")
+                .body("{\"ingredients\":[\"" + randomIngredient + "\",\"" + ingredients.get(random.nextInt(ingredients.size())) + "\" ]}")
                 .when()
                 .post("/api/orders")
                 .then()
                 .statusCode(200)
                 .body("success", equalTo(true))
                 .body("order.number", notNullValue());
-
 
 
         given()
@@ -121,7 +121,7 @@ public class OrderCreationTest {
 
         given()
                 .contentType(ContentType.JSON)
-                .body("{\"ingredients\":[\"" + randomIngredient +  "\",\"" + ingredients.get(random.nextInt(ingredients.size())) +"\" ]}")
+                .body("{\"ingredients\":[\"" + randomIngredient + "\",\"" + ingredients.get(random.nextInt(ingredients.size())) + "\" ]}")
                 .when()
                 .post("/api/orders")
                 .then()
@@ -139,13 +139,15 @@ public class OrderCreationTest {
     @Test
     public void createOrderWithIngredientsTest() {
         String email = java.util.UUID.randomUUID() + "@gmail.com";
+        String password = java.util.UUID.randomUUID().toString();
         String name = java.util.UUID.randomUUID().toString();
+
+        User user = new User(email, password, name);
+        User userEmailAndPass = new User(email, password);
 
         String accessToken = given()
                 .contentType(ContentType.JSON)
-                .body("{\"email\":\"" + email + "\"," +
-                        "\"password\":\"1234\"," +
-                        "\"name\":\"" + name + "\"}")
+                .body(user)
                 .when()
                 .post("/api/auth/register")
                 .then()
@@ -160,7 +162,7 @@ public class OrderCreationTest {
 
         accessToken = given()
                 .contentType(ContentType.JSON)
-                .body("{\"email\":\"" + email + "\"," + "\"password\":\"1234\"}")
+                .body(userEmailAndPass)
                 .when()
                 .post("/api/auth/login")
                 .then()
@@ -176,14 +178,13 @@ public class OrderCreationTest {
         given()
                 .contentType(ContentType.JSON)
                 .header("Authorization", accessToken)
-                .body("{\"ingredients\":[\"" + randomIngredient +  "\",\"" + ingredients.get(random.nextInt(ingredients.size())) +"\" ]}")
+                .body("{\"ingredients\":[\"" + randomIngredient + "\",\"" + ingredients.get(random.nextInt(ingredients.size())) + "\" ]}")
                 .when()
                 .post("/api/orders")
                 .then()
                 .statusCode(200)
                 .body("success", equalTo(true))
                 .body("order.number", notNullValue());
-
 
 
         given()
@@ -204,13 +205,15 @@ public class OrderCreationTest {
     @Test
     public void createOrderWithoutIngredientsTest() {
         String email = java.util.UUID.randomUUID() + "@gmail.com";
+        String password = java.util.UUID.randomUUID().toString();
         String name = java.util.UUID.randomUUID().toString();
+
+        User user = new User(email, password, name);
+        User userEmailAndPass = new User(email, password);
 
         String accessToken = given()
                 .contentType(ContentType.JSON)
-                .body("{\"email\":\"" + email + "\"," +
-                        "\"password\":\"1234\"," +
-                        "\"name\":\"" + name + "\"}")
+                .body(user)
                 .when()
                 .post("/api/auth/register")
                 .then()
@@ -225,7 +228,7 @@ public class OrderCreationTest {
 
         accessToken = given()
                 .contentType(ContentType.JSON)
-                .body("{\"email\":\"" + email + "\"," + "\"password\":\"1234\"}")
+                .body(userEmailAndPass)
                 .when()
                 .post("/api/auth/login")
                 .then()
@@ -250,7 +253,6 @@ public class OrderCreationTest {
                 .body("message", equalTo("Ingredient ids must be provided"));
 
 
-
         given()
                 .contentType(ContentType.JSON)
                 .header("Authorization", accessToken)
@@ -269,13 +271,15 @@ public class OrderCreationTest {
     @Test
     public void createOrderWithInvalidIngredientIDTest() {
         String email = java.util.UUID.randomUUID() + "@gmail.com";
+        String password = java.util.UUID.randomUUID().toString();
         String name = java.util.UUID.randomUUID().toString();
+
+        User user = new User(email, password, name);
+        User userEmailAndPass = new User(email, password);
 
         String accessToken = given()
                 .contentType(ContentType.JSON)
-                .body("{\"email\":\"" + email + "\"," +
-                        "\"password\":\"1234\"," +
-                        "\"name\":\"" + name + "\"}")
+                .body(user)
                 .when()
                 .post("/api/auth/register")
                 .then()
@@ -290,7 +294,7 @@ public class OrderCreationTest {
 
         accessToken = given()
                 .contentType(ContentType.JSON)
-                .body("{\"email\":\"" + email + "\"," + "\"password\":\"1234\"}")
+                .body(userEmailAndPass)
                 .when()
                 .post("/api/auth/login")
                 .then()
@@ -313,7 +317,6 @@ public class OrderCreationTest {
                 .statusCode(500);
 
 
-
         given()
                 .contentType(ContentType.JSON)
                 .header("Authorization", accessToken)
@@ -323,8 +326,6 @@ public class OrderCreationTest {
                 .statusCode(202)
                 .body("message", equalTo("User successfully removed"));
     }
-
-
 
 
 }

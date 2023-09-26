@@ -1,3 +1,4 @@
+import Constructor.User;
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
@@ -5,14 +6,15 @@ import io.restassured.http.ContentType;
 import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
+
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 
 public class UserLoginTest {
 
     @Before
-    public void setUp()
-    {
+    public void setUp() {
         RestAssured.baseURI = "https://stellarburgers.nomoreparties.site";
     }
 
@@ -23,27 +25,29 @@ public class UserLoginTest {
     @Test
     public void userLoginTest() {
         String email = java.util.UUID.randomUUID() + "@gmail.com";
+        String password = java.util.UUID.randomUUID().toString();
         String name = java.util.UUID.randomUUID().toString();
+
+        User user = new User(email, password, name);
+        User userEmailAndPass = new User(email, password);
 
         String accessToken = given()
                 .contentType(ContentType.JSON)
-                .body("{\"email\":\"" + email + "\"," +
-                        "\"password\":\"1234\"," +
-                        "\"name\":\"" + name + "\"}")
+                .body(user)
                 .when()
                 .post("/api/auth/register")
                 .then()
                 .statusCode(200)
                 .body("success", equalTo(true))
-                .body(CoreMatchers.containsString("user"))
-                .body(CoreMatchers.containsString("accessToken"))
-                .body(CoreMatchers.containsString("refreshToken"))
+                .body(containsString("user"))
+                .body(containsString("accessToken"))
+                .body(containsString("refreshToken"))
                 .extract()
                 .path("accessToken");
 
         given()
                 .contentType(ContentType.JSON)
-                .body("{\"email\":\"" + email + "\"," + "\"password\":\"1234\"}")
+                .body(userEmailAndPass)
                 .when()
                 .post("/api/auth/login")
                 .then()
@@ -71,21 +75,22 @@ public class UserLoginTest {
     @Test
     public void userLoginWithEmptyPasswordTest() {
         String email = java.util.UUID.randomUUID() + "@gmail.com";
+        String password = java.util.UUID.randomUUID().toString();
         String name = java.util.UUID.randomUUID().toString();
+
+        User user = new User(email, password, name);
 
         String accessToken = given()
                 .contentType(ContentType.JSON)
-                .body("{\"email\":\"" + email + "\"," +
-                        "\"password\":\"1234\"," +
-                        "\"name\":\"" + name + "\"}")
+                .body(user)
                 .when()
                 .post("/api/auth/register")
                 .then()
                 .statusCode(200)
                 .body("success", equalTo(true))
-                .body(CoreMatchers.containsString("user"))
-                .body(CoreMatchers.containsString("accessToken"))
-                .body(CoreMatchers.containsString("refreshToken"))
+                .body(containsString("user"))
+                .body(containsString("accessToken"))
+                .body(containsString("refreshToken"))
                 .extract()
                 .path("accessToken");
 
@@ -117,21 +122,22 @@ public class UserLoginTest {
     @Test
     public void userLoginWithEmptyEmailTest() {
         String email = java.util.UUID.randomUUID() + "@gmail.com";
+        String password = java.util.UUID.randomUUID().toString();
         String name = java.util.UUID.randomUUID().toString();
+
+        User user = new User(email, password, name);
 
         String accessToken = given()
                 .contentType(ContentType.JSON)
-                .body("{\"email\":\"" + email + "\"," +
-                        "\"password\":\"1234\"," +
-                        "\"name\":\"" + name + "\"}")
+                .body(user)
                 .when()
                 .post("/api/auth/register")
                 .then()
                 .statusCode(200)
                 .body("success", equalTo(true))
-                .body(CoreMatchers.containsString("user"))
-                .body(CoreMatchers.containsString("accessToken"))
-                .body(CoreMatchers.containsString("refreshToken"))
+                .body(containsString("user"))
+                .body(containsString("accessToken"))
+                .body(containsString("refreshToken"))
                 .extract()
                 .path("accessToken");
 

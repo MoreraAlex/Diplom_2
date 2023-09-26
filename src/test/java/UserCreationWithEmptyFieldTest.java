@@ -1,3 +1,4 @@
+import Constructor.User;
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
@@ -45,11 +46,11 @@ public class UserCreationWithEmptyFieldTest {
     @Description("1. Попытка создать юзера с отсутствующим обязательным полем")
     @Test
     public void createUserWithEmptyFieldTest() {
+        User user = new User(email, password, name);
+
         given()
                 .contentType(ContentType.JSON)
-                .body("{\"email\":\"" + email + "\"," +
-                        "\"password\":\"" + password + "\"," +
-                        "\"name\":\"" + name + "\"}")
+                .body(user)
                 .when()
                 .post("/api/auth/register")
                 .then()
