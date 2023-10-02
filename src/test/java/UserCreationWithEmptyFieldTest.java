@@ -1,23 +1,17 @@
 import Constructor.User;
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
-import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import static Configuration.Endpoints.REGISTER;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
 
 @RunWith(Parameterized.class)
-public class UserCreationWithEmptyFieldTest {
-    @Before
-    public void setUp()
-    {
-        RestAssured.baseURI = "https://stellarburgers.nomoreparties.site";
-    }
+public class UserCreationWithEmptyFieldTest extends ConfigurationForTest {
 
     private String email;
     private String password;
@@ -36,9 +30,9 @@ public class UserCreationWithEmptyFieldTest {
     @Parameterized.Parameters
     public static Object[][] testData() {
         return new Object[][]{
-                {"", "1234", "Alex", 403, "Email, password and name are required fields"},
-                {"test@yandex,com", "", "Alex", 403, "Email, password and name are required fields"},
-                {"test@yandex,com", "1234", "", 403, "Email, password and name are required fields"},
+                {"", "1234567", "Alex", 403, "Email, password and name are required fields"},
+                {"test@yandex.com", "", "Alex", 403, "Email, password and name are required fields"},
+                {"test@yandex.com", "1234", "", 403, "Email, password and name are required fields"},
         };
     }
 
@@ -52,8 +46,9 @@ public class UserCreationWithEmptyFieldTest {
                 .contentType(ContentType.JSON)
                 .body(user)
                 .when()
-                .post("/api/auth/register")
+                .post(REGISTER)
                 .then()
+                .assertThat()
                 .statusCode(expectedStatusCode)
                 .body("success", equalTo(false))
                 .body("message", equalTo(expectedErrorMessage));

@@ -1,57 +1,24 @@
-import Constructor.User;
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
-import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import org.hamcrest.CoreMatchers;
-import org.junit.Before;
+import org.junit.Assert;
 import org.junit.Test;
 
+import static Configuration.Endpoints.REGISTER;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
 
 
-public class UserCreationTest {
+public class UserCreationTest extends ConfigurationForTest {
 
-    @Before
-    public void setUp() {
-        RestAssured.baseURI = "https://stellarburgers.nomoreparties.site";
-    }
 
     @DisplayName("Создание нового юзера")
     @Description("1. Создаем юзера \n" +
-            "2. Удаляем юзера")
+            " 2. Проверяем, что accessToken получен \n" +
+            "3. Удаляем юзера")
     @Test
     public void createUserTest() {
-        String email = java.util.UUID.randomUUID() + "@gmail.com";
-        String password = java.util.UUID.randomUUID().toString();
-        String name = java.util.UUID.randomUUID().toString();
-
-        User user = new User(email, password, name);
-
-        String accessToken = given()
-                .contentType(ContentType.JSON)
-                .body(user)
-                .when()
-                .post("/api/auth/register")
-                .then()
-                .statusCode(200)
-                .body("success", equalTo(true))
-                .body(CoreMatchers.containsString("user"))
-                .body(CoreMatchers.containsString("accessToken"))
-                .body(CoreMatchers.containsString("refreshToken"))
-                .extract()
-                .path("accessToken");
-
-
-        given()
-                .contentType(ContentType.JSON)
-                .header("Authorization", accessToken)
-                .when()
-                .delete("/api/auth/user")
-                .then()
-                .statusCode(202)
-                .body("message", equalTo("User successfully removed"));
+        Assert.assertTrue("Токен отсутствует, пользователь не создан", accessToken != null);
     }
 
     @DisplayName("Создание нового юзера с существующими данными")
@@ -60,44 +27,16 @@ public class UserCreationTest {
             "3.Удаляем юзера_1")
     @Test
     public void createUserThatAlreadyExistsTest() {
-        String email = java.util.UUID.randomUUID() + "@gmail.com";
-        String password = java.util.UUID.randomUUID().toString();
-        String name = java.util.UUID.randomUUID().toString();
-
-        User user = new User(email, password, name);
-
-        String accessToken = given()
-                .contentType(ContentType.JSON)
-                .body(user)
-                .when()
-                .post("/api/auth/register")
-                .then()
-                .statusCode(200)
-                .body(CoreMatchers.containsString("success"))
-                .body(CoreMatchers.containsString("user"))
-                .body(CoreMatchers.containsString("accessToken"))
-                .body(CoreMatchers.containsString("refreshToken"))
-                .extract()
-                .path("accessToken");
-
 
         given()
                 .contentType(ContentType.JSON)
                 .body(user)
                 .when()
-                .post("/api/auth/register")
+                .post(REGISTER)
                 .then()
+                .assertThat()
                 .statusCode(403)
                 .body("message", equalTo("User already exists"));
-
-        given()
-                .contentType(ContentType.JSON)
-                .header("Authorization", accessToken)
-                .when()
-                .delete("/api/auth/user")
-                .then()
-                .statusCode(202)
-                .body("message", equalTo("User successfully removed"));
 
     }
 

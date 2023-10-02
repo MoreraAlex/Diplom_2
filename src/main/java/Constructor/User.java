@@ -11,11 +11,11 @@ public class User {
         this.name = name;
         this.password = password;
     }
+
     public User(String email, String password) {
         this.email = email;
         this.password = password;
     }
-
 
 
     public String getName() {
